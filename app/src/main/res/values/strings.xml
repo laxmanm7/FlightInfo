@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">FlightInfo</string>
+
+    <string name="start">From</string>
+    <string name="destination">To</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_airport">AirportActivity</string>
+
+    <string name="please_wait">Please wait...</string>
+    <string name="origin_point">Origin point</string>
+    <string name="destination_point">Destination point</string>
+
+    <string name="airport_hint">Find airport</string>
+    <string name="accept">Accept</string>
+
+    <string name="incomplete_data">Incomplete data</string>
+
+    <string name="hello_world">Hello world!</string>
+</resources>

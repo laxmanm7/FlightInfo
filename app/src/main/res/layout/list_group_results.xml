@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/results_group_text_view"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:gravity="left"
+    android:drawableRight="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
+    android:layout_marginLeft="8dp"
+    android:paddingLeft="16dp"
+    android:text=""
+    android:textSize="32sp"
+    android:orientation="vertical"
+    tools:context=".ResultsActivity"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="GDN 9:15"
+            android:id="@+id/departure_textView"
+            android:layout_marginRight="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="40h"
+            android:id="@+id/travel_time_textView" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="OSL 1:15"
+            android:id="@+id/arrival_textView"
+            android:layout_marginLeft="16dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="1023 PLN"
+            android:textStyle="bold"
+            android:id="@+id/price_textView"
+            android:layout_marginRight="16dp"
+            />
+
+    </LinearLayout>
+
+
+
+</LinearLayout>
