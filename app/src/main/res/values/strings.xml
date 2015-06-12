@@ -15,5 +15,7 @@
 
     <string name="incomplete_data">Incomplete data</string>
 
+    <string name="no_internet_connection">No Internet connection</string>
+
     <string name="hello_world">Hello world!</string>
 </resources>

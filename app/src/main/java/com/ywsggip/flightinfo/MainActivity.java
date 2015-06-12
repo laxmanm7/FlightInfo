@@ -2,6 +2,8 @@ package com.ywsggip.flightinfo;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -11,24 +13,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -88,7 +85,10 @@ public class MainActivity extends ActionBarActivity {
                 String param = "gafds";
                 FetchInfoTask infoTask = new FetchInfoTask();
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                if(DESTINATION_IATA_CODE.isEmpty()) {
+                if(!hasInternetConnection()) {
+                    Toast.makeText(MainActivity.this, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
+                }
+                else if(DESTINATION_IATA_CODE.isEmpty()) {
                     Toast.makeText(MainActivity.this, "No destination airport chosen", Toast.LENGTH_SHORT).show();
                 }
                 else if(ORIGIN_IATA_CODE.isEmpty()){
@@ -103,6 +103,15 @@ public class MainActivity extends ActionBarActivity {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             }
         });
+    }
+
+
+    private boolean hasInternetConnection() {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        boolean isConnected = activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        return isConnected;
     }
 
     private String getReadableDate(long time) {
@@ -189,26 +198,7 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected Void doInBackground(String... params) {
-//            {
-//                "request": {
-//                "slice": [
-//                {
-//                    "origin": "GDN",
-//                        "destination": "GND",
-//                        "date": "2015-06-08"
-//                }
-//                ],
-//                "passengers": {
-//                    "adultCount": 1,
-//                            "infantInLapCount": 0,
-//                            "infantInSeatCount": 0,
-//                            "childCount": 0,
-//                            "seniorCount": 0
-//                },
-//                "solutions": 20,
-//                        "refundable": false
-//            }
-//            }
+
             JSONObject jsonRequest = new JSONObject();
             try {
                 String DATE = getReadableDate(getChosenTime());
@@ -259,7 +249,7 @@ public class MainActivity extends ActionBarActivity {
                 InputStream inputStream = httpResponse.getEntity().getContent();
                 if(inputStream != null){
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    String line = "";
+                    String line;
                     while ((line = bufferedReader.readLine()) != null)
                         output += line;
                     inputStream.close();
