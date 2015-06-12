@@ -17,7 +17,7 @@
         android:layout_gravity="center_horizontal" />
 
     <TextView
-        android:id="@android:id/empty"
+        android:id="@+id/empty"
         android:textAlignment="center"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_height="match_parent"

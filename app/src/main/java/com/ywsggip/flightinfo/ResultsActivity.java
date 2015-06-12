@@ -57,6 +57,7 @@ public class ResultsActivity extends ActionBarActivity {
         ExpandableListView expandableListView = (ExpandableListView) findViewById(R.id.expandableListView);
         ResultsExpandableListAdapter adapter = new ResultsExpandableListAdapter(this, groups);
         expandableListView.setAdapter(adapter);
+        expandableListView.setEmptyView(findViewById(R.id.empty));
     }
 
     String minutesToStringTime(int min) {
