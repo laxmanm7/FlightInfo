@@ -1,4 +1,4 @@
-package com.ywsggip.flightinfo;
+package com.ywsggip.flightinfo.test;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

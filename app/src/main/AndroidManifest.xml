@@ -33,6 +33,10 @@
             android:name=".ResultsActivity"
             android:label="Results"/>
 
+        <provider
+            android:authorities="com.ywsggip.flightinfo"
+            android:name=".data.AirportsProvider" />
+
     </application>
 
 </manifest>
