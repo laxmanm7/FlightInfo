@@ -4,6 +4,11 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,8 +19,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.ywsggip.flightinfo.data.AirportsContract;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,14 +33,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class AirportActivity extends ActionBarActivity {
+public class AirportActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
 
     private final String LOG_TAG = AirportActivity.class.getSimpleName();
     private String action;
-    private ArrayAdapter<String> mAirportsAdapter;
+    private SimpleCursorAdapter mAirportsAdapter;
 
     private String IATA_CODE;
+
+
+    private static final String[] AIRPORT_COLUMNS = {
+            AirportsContract.AirportEntry._ID,
+            AirportsContract.AirportEntry.COLUMN_IATA_CODE,
+            AirportsContract.AirportEntry.COLUMN_AIRPORT_NAME,
+            AirportsContract.AirportEntry.COLUMN_CITY_NAME,
+            AirportsContract.AirportEntry.COLUMN_COUNTRY_NAME
+    };
+
+
 
     // extract IATA from data provided by searchForAirports(String)
     private String getIATACode(String data) {
@@ -89,12 +108,29 @@ public class AirportActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_airport);
 
-        mAirportsAdapter =
-                new ArrayAdapter<>(
-                        this,
-                        R.layout.list_item_airport,
-                        R.id.list_item_airport_textview,
-                        new ArrayList<String>());
+//        mAirportsAdapter =
+//                new ArrayAdapter<>(
+//                        this,
+//                        R.layout.list_item_airport,
+//                        R.id.list_item_airport_textview,
+//                        new ArrayList<String>());
+
+        mAirportsAdapter = new SimpleCursorAdapter(
+                this,
+                R.layout.list_item_airport_2,
+                null,
+                new String[] {AirportsContract.AirportEntry.COLUMN_IATA_CODE,
+                            AirportsContract.AirportEntry.COLUMN_AIRPORT_NAME,
+                            AirportsContract.AirportEntry.COLUMN_CITY_NAME,
+                            AirportsContract.AirportEntry.COLUMN_COUNTRY_NAME
+                },
+                new int[] {R.id.list_item_iata_textview,
+                        R.id.list_item_name_textview,
+                        R.id.list_item_city_textview,
+                        R.id.list_item_country_textview
+                },
+                0
+        );
 
         ListView listView = (ListView) findViewById(R.id.listview_airports);
         listView.setAdapter(mAirportsAdapter);
@@ -102,13 +138,16 @@ public class AirportActivity extends ActionBarActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String airport = mAirportsAdapter.getItem(position);
-                IATA_CODE = getIATACode(airport);
-                Intent intent = new Intent();
-                intent.putExtra(action, airport);
-                intent.putExtra("IATA", IATA_CODE);
-                setResult(RESULT_OK, intent);
-                finish();
+                mAirportsAdapter = (SimpleCursorAdapter) parent.getAdapter();
+                mAirportsAdapter.getItem(position);
+
+//                String airport = mAirportsAdapter.getItem(position);
+//                IATA_CODE = getIATACode(airport);
+//                Intent intent = new Intent();
+//                intent.putExtra(action, airport);
+//                intent.putExtra("IATA", IATA_CODE);
+//                setResult(RESULT_OK, intent);
+//                finish();
             }
         });
 
@@ -122,10 +161,15 @@ public class AirportActivity extends ActionBarActivity {
 
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            List<String> airportsList = searchForAirports(query);
+//            List<String> airportsList = searchForAirports(query);
             //Log.d(LOG_TAG, "Query is: " + query);
-            mAirportsAdapter.clear();
-            mAirportsAdapter.addAll(airportsList);
+
+//            mAirportsAdapter.clear();
+//            mAirportsAdapter.addAll(airportsList);
+
+            new FetchAirportsTask().execute(query);
+
+
         } else {
 
             action = intent.getStringExtra("action");
@@ -158,10 +202,11 @@ public class AirportActivity extends ActionBarActivity {
         Toast.makeText(this, "fasdfad", Toast.LENGTH_LONG);
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            List<String> airportsList = searchForAirports(query);
-            Log.d(LOG_TAG, "Query is: " + query);
-            mAirportsAdapter.clear();
-            mAirportsAdapter.addAll(airportsList);
+//            List<String> airportsList = searchForAirports(query);
+//            Log.d(LOG_TAG, "Query is: " + query);
+//            mAirportsAdapter.clear();
+//            mAirportsAdapter.addAll(airportsList);
+            new FetchAirportsTask().execute(query);
         }
     }
 
@@ -188,4 +233,44 @@ public class AirportActivity extends ActionBarActivity {
     }
 
 
+    public class FetchAirportsTask extends AsyncTask<String, Integer, Cursor>{
+
+        @Override
+        protected Cursor doInBackground(String... params) {
+            String query = params[0];
+            Uri uri = AirportsContract.AirportEntry.buildAirportWithFilter(query);
+            Cursor result = getContentResolver().query(
+                    uri,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Cursor cursor) {
+            super.onPostExecute(cursor);
+            mAirportsAdapter.swapCursor(cursor);
+
+        }
+    }
+
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
 }
