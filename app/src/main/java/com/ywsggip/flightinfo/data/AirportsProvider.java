@@ -76,7 +76,7 @@ public class AirportsProvider extends ContentProvider {
             }
                 break;
             case AIRPORT_WITH_FILTER: {
-                String filter =  "%" + AirportsContract.AirportEntry.getFilterFromUri(uri) + "%";
+                String filter =  /*"%" +*/ AirportsContract.AirportEntry.getFilterFromUri(uri) + "%";
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         AirportsContract.AirportEntry.TABLE_NAME,
                         projection,

@@ -51,7 +51,11 @@ public class AirportActivity extends ActionBarActivity implements LoaderManager.
             AirportsContract.AirportEntry.COLUMN_COUNTRY_NAME
     };
 
-
+    private static final int COL_AIRPORT_ID = 0;
+    private static final int COL_AIRPORT_IATA = 1;
+    private static final int COL_AIRPORT_NAME = 2;
+    private static final int COL_AIRPORT_CITY = 3;
+    private static final int COL_AIRPORT_COUNTRY = 4;
 
     // extract IATA from data provided by searchForAirports(String)
     private String getIATACode(String data) {
@@ -138,9 +142,23 @@ public class AirportActivity extends ActionBarActivity implements LoaderManager.
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mAirportsAdapter = (SimpleCursorAdapter) parent.getAdapter();
-                mAirportsAdapter.getItem(position);
+                SimpleCursorAdapter adapter = (SimpleCursorAdapter) parent.getAdapter();
+                Cursor cursor = adapter.getCursor();
 
+                if(cursor != null && cursor.moveToPosition(position)) {
+                    IATA_CODE = cursor.getString(COL_AIRPORT_IATA);
+
+                    String airport = String.format("[%s] %s, %s",
+                            IATA_CODE,
+                            cursor.getString(COL_AIRPORT_CITY),
+                            cursor.getString(COL_AIRPORT_COUNTRY));
+
+                    Intent intent = new Intent();
+                    intent.putExtra(action, airport);
+                    intent.putExtra("IATA", IATA_CODE);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
 //                String airport = mAirportsAdapter.getItem(position);
 //                IATA_CODE = getIATACode(airport);
 //                Intent intent = new Intent();
