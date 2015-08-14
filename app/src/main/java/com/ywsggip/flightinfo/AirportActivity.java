@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -12,11 +13,14 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
@@ -33,12 +37,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class AirportActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class AirportActivity extends ActionBarActivity {
 
 
     private final String LOG_TAG = AirportActivity.class.getSimpleName();
     private String action;
-    private SimpleCursorAdapter mAirportsAdapter;
+    private AirportsAdapter mAirportsAdapter;
+
+    private String queryString;
 
     private String IATA_CODE;
 
@@ -51,11 +57,16 @@ public class AirportActivity extends ActionBarActivity implements LoaderManager.
             AirportsContract.AirportEntry.COLUMN_COUNTRY_NAME
     };
 
-    private static final int COL_AIRPORT_ID = 0;
-    private static final int COL_AIRPORT_IATA = 1;
-    private static final int COL_AIRPORT_NAME = 2;
-    private static final int COL_AIRPORT_CITY = 3;
-    private static final int COL_AIRPORT_COUNTRY = 4;
+    public static final int COL_AIRPORT_ID = 0;
+    public static final int COL_AIRPORT_IATA = 1;
+    public static final int COL_AIRPORT_NAME = 2;
+    public static final int COL_AIRPORT_CITY = 3;
+    public static final int COL_AIRPORT_COUNTRY = 4;
+
+
+    public String getQueryString(){
+        return queryString;
+    }
 
     // extract IATA from data provided by searchForAirports(String)
     private String getIATACode(String data) {
@@ -118,23 +129,26 @@ public class AirportActivity extends ActionBarActivity implements LoaderManager.
 //                        R.layout.list_item_airport,
 //                        R.id.list_item_airport_textview,
 //                        new ArrayList<String>());
+//////////////////////////////////////////////////////////////////////////////////////
+//        mAirportsAdapter = new SimpleCursorAdapter(
+//                this,
+//                R.layout.list_item_airport_2,
+//                null,
+//                new String[] {AirportsContract.AirportEntry.COLUMN_IATA_CODE,
+//                            AirportsContract.AirportEntry.COLUMN_AIRPORT_NAME,
+//                            AirportsContract.AirportEntry.COLUMN_CITY_NAME,
+//                            AirportsContract.AirportEntry.COLUMN_COUNTRY_NAME
+//                },
+//                new int[] {R.id.list_item_iata_textview,
+//                        R.id.list_item_name_textview,
+//                        R.id.list_item_city_textview,
+//                        R.id.list_item_country_textview
+//                },
+//                0
+//        );
+///////////////////////////////////////////////////////////////////////////////////////
 
-        mAirportsAdapter = new SimpleCursorAdapter(
-                this,
-                R.layout.list_item_airport_2,
-                null,
-                new String[] {AirportsContract.AirportEntry.COLUMN_IATA_CODE,
-                            AirportsContract.AirportEntry.COLUMN_AIRPORT_NAME,
-                            AirportsContract.AirportEntry.COLUMN_CITY_NAME,
-                            AirportsContract.AirportEntry.COLUMN_COUNTRY_NAME
-                },
-                new int[] {R.id.list_item_iata_textview,
-                        R.id.list_item_name_textview,
-                        R.id.list_item_city_textview,
-                        R.id.list_item_country_textview
-                },
-                0
-        );
+        mAirportsAdapter = new AirportsAdapter(this, null, 0);
 
         ListView listView = (ListView) findViewById(R.id.listview_airports);
         listView.setAdapter(mAirportsAdapter);
@@ -142,7 +156,7 @@ public class AirportActivity extends ActionBarActivity implements LoaderManager.
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SimpleCursorAdapter adapter = (SimpleCursorAdapter) parent.getAdapter();
+                AirportsAdapter adapter = (AirportsAdapter) parent.getAdapter();
                 Cursor cursor = adapter.getCursor();
 
                 if(cursor != null && cursor.moveToPosition(position)) {
@@ -219,11 +233,9 @@ public class AirportActivity extends ActionBarActivity implements LoaderManager.
         super.onNewIntent(intent);
         Toast.makeText(this, "fasdfad", Toast.LENGTH_LONG);
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
+
             String query = intent.getStringExtra(SearchManager.QUERY);
-//            List<String> airportsList = searchForAirports(query);
-//            Log.d(LOG_TAG, "Query is: " + query);
-//            mAirportsAdapter.clear();
-//            mAirportsAdapter.addAll(airportsList);
+            queryString = new String(query);
             new FetchAirportsTask().execute(query);
         }
     }
@@ -264,7 +276,10 @@ public class AirportActivity extends ActionBarActivity implements LoaderManager.
                     null,
                     null
             );
-
+//            Bundle bundle = new Bundle();
+//            bundle.putString("query", query);
+//            result.respond(bundle);
+            mAirportsAdapter.setQuery(query);
             return result;
         }
 
@@ -277,18 +292,6 @@ public class AirportActivity extends ActionBarActivity implements LoaderManager.
     }
 
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return null;
-    }
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
 }
