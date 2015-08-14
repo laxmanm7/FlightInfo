@@ -150,6 +150,39 @@ public class AirportActivity extends ActionBarActivity {
 
         mAirportsAdapter = new AirportsAdapter(this, null, 0);
 
+
+
+        //init searchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final SearchView searchView = (SearchView) findViewById(R.id.searchView);
+        SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
+        searchView.setSearchableInfo(searchableInfo);
+
+
+        //searchView.setSuggestionsAdapter(mAirportsAdapter);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+//                if(query.length() > 1) {
+//                    new FetchAirportsTask().execute(query);
+//                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if(newText.length() > 1) {
+                    new FetchAirportsTask().execute(newText);
+                }
+                else {
+                    mAirportsAdapter.swapCursor(null);
+                }
+                return true;
+            }
+        });
+
+
         ListView listView = (ListView) findViewById(R.id.listview_airports);
         listView.setAdapter(mAirportsAdapter);
 
@@ -171,37 +204,19 @@ public class AirportActivity extends ActionBarActivity {
                     intent.putExtra(action, airport);
                     intent.putExtra("IATA", IATA_CODE);
                     setResult(RESULT_OK, intent);
+                    searchView.clearFocus();
                     finish();
                 }
-//                String airport = mAirportsAdapter.getItem(position);
-//                IATA_CODE = getIATACode(airport);
-//                Intent intent = new Intent();
-//                intent.putExtra(action, airport);
-//                intent.putExtra("IATA", IATA_CODE);
-//                setResult(RESULT_OK, intent);
-//                finish();
+
             }
         });
 
-        //init searchView
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        final SearchView searchView = (SearchView) findViewById(R.id.searchView);
-        SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
-        searchView.setSearchableInfo(searchableInfo);
 
         Intent intent = getIntent();
 
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-//            List<String> airportsList = searchForAirports(query);
-            //Log.d(LOG_TAG, "Query is: " + query);
-
-//            mAirportsAdapter.clear();
-//            mAirportsAdapter.addAll(airportsList);
-
             new FetchAirportsTask().execute(query);
-
-
         } else {
 
             action = intent.getStringExtra("action");
@@ -214,18 +229,6 @@ public class AirportActivity extends ActionBarActivity {
             }
         }
 
-//        Button acceptButton = (Button) findViewById(R.id.accept_button);
-//        acceptButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                EditText originEditText = (EditText) findViewById(R.id.airport_code);
-//
-//                Intent intent = new Intent();
-//                intent.putExtra(action, originEditText.getText().toString());
-//                setResult(RESULT_OK, intent);
-//                finish();
-//            }
-//        });
     }
 
     @Override
@@ -276,9 +279,7 @@ public class AirportActivity extends ActionBarActivity {
                     null,
                     null
             );
-//            Bundle bundle = new Bundle();
-//            bundle.putString("query", query);
-//            result.respond(bundle);
+
             mAirportsAdapter.setQuery(query);
             return result;
         }
