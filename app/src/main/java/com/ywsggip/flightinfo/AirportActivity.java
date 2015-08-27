@@ -16,8 +16,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
@@ -183,7 +185,7 @@ public class AirportActivity extends ActionBarActivity {
         });
 
 
-        ListView listView = (ListView) findViewById(R.id.listview_airports);
+        final ListView listView = (ListView) findViewById(R.id.listview_airports);
         listView.setAdapter(mAirportsAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -207,6 +209,26 @@ public class AirportActivity extends ActionBarActivity {
                     searchView.clearFocus();
                     finish();
                 }
+
+            }
+        });
+
+       // searchView.setFocusable(false);
+       // listView.setVisibility(View.VISIBLE);
+        listView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+//                if(listView.hasFocus()) {
+//                    return false;
+//                }
+//                else {
+
+                    InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
+                    searchView.clearFocus();
+                    listView.requestFocus();
+                    return false;
+//                }
 
             }
         });

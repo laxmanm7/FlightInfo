@@ -20,7 +20,8 @@
         <activity
             android:name=".AirportActivity"
             android:label="@string/title_activity_airport"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateUnchanged|adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <category android:name="android.intent.category.LAUNCHER" />
