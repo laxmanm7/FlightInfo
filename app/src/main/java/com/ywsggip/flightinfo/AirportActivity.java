@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.AbstractCursor;
 import android.database.Cursor;
+import android.media.RemoteControlClient;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
@@ -19,6 +21,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -160,6 +163,8 @@ public class AirportActivity extends ActionBarActivity {
         SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
         searchView.setSearchableInfo(searchableInfo);
 
+        if(Build.VERSION.SDK_INT >= 16)
+            searchView.setImeOptions(searchView.getImeOptions()|EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
         //searchView.setSuggestionsAdapter(mAirportsAdapter);
 

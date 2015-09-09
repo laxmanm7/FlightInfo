@@ -21,18 +21,29 @@
             android:name=".AirportActivity"
             android:label="@string/title_activity_airport"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="stateUnchanged|adjustPan">
+            android:windowSoftInputMode="stateUnchanged|adjustPan"
+            android:parentActivityName="com.ywsggip.flightinfo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ywsggip.flightinfo.MainActivity"/>
         </activity>
         <activity
             android:name=".ResultsActivity"
-            android:label="Results"/>
+            android:label="Results"
+            android:parentActivityName="com.ywsggip.flightinfo.MainActivity">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ywsggip.flightinfo.MainActivity"/>
+        </activity>
 
         <provider
             android:authorities="com.ywsggip.flightinfo"
