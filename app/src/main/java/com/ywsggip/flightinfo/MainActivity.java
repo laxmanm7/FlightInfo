@@ -2,6 +2,7 @@ package com.ywsggip.flightinfo;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
@@ -49,12 +51,15 @@ public class MainActivity extends ActionBarActivity {
 
     DatePicker datePicker;
 
+    EditText editOrigin;
+    EditText editDestination;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EditText editOrigin = (EditText) findViewById(R.id.editOrigin);
+        editOrigin = (EditText) findViewById(R.id.editOrigin);
         editOrigin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -64,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        EditText editDestination = (EditText) findViewById(R.id.editDestination);
+        editDestination = (EditText) findViewById(R.id.editDestination);
         editDestination.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,6 +82,22 @@ public class MainActivity extends ActionBarActivity {
 
         datePicker = (DatePicker) findViewById(R.id.datePicker);
         //datePicker.setMinDate(System.currentTimeMillis());
+
+        ImageButton swapButton = (ImageButton) findViewById(R.id.swapButton);
+        swapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String originString = editOrigin.getText().toString();
+                String destinationString = editDestination.getText().toString();
+
+                editOrigin.setText(destinationString);
+                editDestination.setText(originString);
+
+                String tempIATA = ORIGIN_IATA_CODE;
+                ORIGIN_IATA_CODE = DESTINATION_IATA_CODE;
+                DESTINATION_IATA_CODE = tempIATA;
+            }
+        });
 
         Button sendRequestButton = (Button) findViewById(R.id.sendRequestButton);
         sendRequestButton.setOnClickListener(new View.OnClickListener() {
