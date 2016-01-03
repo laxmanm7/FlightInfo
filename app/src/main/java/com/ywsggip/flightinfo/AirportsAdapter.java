@@ -35,7 +35,8 @@ public class AirportsAdapter extends CursorAdapter {
     }
 
     private Spannable highlightQuery(String text) {
-
+        if(queryString == null)
+            return null;
         if(text.toLowerCase().startsWith(queryString.toLowerCase())) {
             Spannable spannable = new SpannableString(text);
 
