@@ -16,23 +16,17 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +42,7 @@ import java.util.List;
 
 public class AirportActivity extends ActionBarActivity {
 
+    RecentAirports mRecentAirports;
 
     private final String LOG_TAG = AirportActivity.class.getSimpleName();
     private String action;
@@ -137,29 +132,32 @@ public class AirportActivity extends ActionBarActivity {
 
         mAirportsAdapter = new AirportsAdapter(this, null, 0);
 
-        mSharedPref = getPreferences(Context.MODE_PRIVATE);
-        if(mSharedPref != null)
-        {
-            mRecentlyChosenAirport = new MatrixCursor(AIRPORT_COLUMNS, 1);
-            String recentAirport = mSharedPref.getString("RECENT", "DEFAULT");
-            if(!recentAirport.equals("DEFAULT"))
-            {
-                String[] airportArray = recentAirport.split(",");
-                String IATACode = airportArray[0];
-                String AirportName = airportArray[1];
-                String City = airportArray[2];
-                String Country = airportArray[3];
-
-                MatrixCursor.RowBuilder rowBuilder = mRecentlyChosenAirport.newRow();
-                rowBuilder.add(0);
-                rowBuilder.add(IATACode);
-                rowBuilder.add(AirportName);
-                rowBuilder.add(City);
-                rowBuilder.add(Country);
-
-            }
-            mAirportsAdapter.swapCursor(mRecentlyChosenAirport);
-        }
+        //mSharedPref = getPreferences(Context.MODE_PRIVATE);
+        //mRecentAirports = new RecentAirports(mSharedPref.getStringSet("RECENT_AIRPORTS", null));
+        mRecentAirports = new RecentAirports(this);
+        mAirportsAdapter.swapCursor(mRecentAirports.getCursor());
+//        if(mSharedPref != null)
+//        {
+//            mRecentlyChosenAirport = new MatrixCursor(AIRPORT_COLUMNS, 1);
+//            String recentAirport = mSharedPref.getString("RECENT", "DEFAULT");
+//            if(!recentAirport.equals("DEFAULT"))
+//            {
+//                String[] airportArray = recentAirport.split(",");
+//                String IATACode = airportArray[0];
+//                String AirportName = airportArray[1];
+//                String City = airportArray[2];
+//                String Country = airportArray[3];
+//
+//                MatrixCursor.RowBuilder rowBuilder = mRecentlyChosenAirport.newRow();
+//                rowBuilder.add(0);
+//                rowBuilder.add(IATACode);
+//                rowBuilder.add(AirportName);
+//                rowBuilder.add(City);
+//                rowBuilder.add(Country);
+//
+//            }
+//            mAirportsAdapter.swapCursor(mRecentlyChosenAirport);
+//        }
 
 
         mListCover = (FrameLayout) findViewById(R.id.listview_airports_cover);
@@ -195,10 +193,10 @@ public class AirportActivity extends ActionBarActivity {
             public boolean onQueryTextChange(String newText) {
                 if(newText.length() > 1) {
                     new FetchAirportsTask().execute(newText);
-                }
-                else {
+                } else {
                     mAirportsAdapter.setQuery(null);
-                    mAirportsAdapter.swapCursor(mRecentlyChosenAirport);
+                    //mAirportsAdapter.swapCursor(mRecentlyChosenAirport);
+                    mAirportsAdapter.swapCursor(mRecentAirports.getCursor());
                 }
                 return true;
             }
@@ -227,10 +225,14 @@ public class AirportActivity extends ActionBarActivity {
                     intent.putExtra("IATA", IATA_CODE);
                     setResult(RESULT_OK, intent);
                     searchView.clearFocus();
-                    SharedPreferences.Editor sharedPrefEditor = mSharedPref.edit();
 
-                    sharedPrefEditor.putString("RECENT", IATA_CODE + "," + cursor.getString(COL_AIRPORT_NAME) + "," + cursor.getString(COL_AIRPORT_CITY) + "," + cursor.getString(COL_AIRPORT_COUNTRY));
-                    sharedPrefEditor. commit();
+                    //SharedPreferences.Editor sharedPrefEditor = mSharedPref.edit();
+
+                    //sharedPrefEditor.putString("RECENT", IATA_CODE + "," + cursor.getString(COL_AIRPORT_NAME) + "," + cursor.getString(COL_AIRPORT_CITY) + "," + cursor.getString(COL_AIRPORT_COUNTRY));
+                    mRecentAirports.addAirport(IATA_CODE, cursor.getString(COL_AIRPORT_NAME), cursor.getString(COL_AIRPORT_CITY), cursor.getString(COL_AIRPORT_COUNTRY));
+                    mRecentAirports.save();
+                    //sharedPrefEditor.putStringSet("RECENT_AIRPORTS", mRecentAirports.getSet());
+                    //sharedPrefEditor.commit();
                     finish();
                 }
 
