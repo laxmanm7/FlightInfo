@@ -2,10 +2,12 @@ package com.ywsggip.flightinfo;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -33,7 +35,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
     private final String ORIGIN = "origin";
     private final String DESTINATION = "destination";
@@ -49,15 +51,28 @@ public class MainActivity extends ActionBarActivity {
     private String DESTINATION_IATA_CODE = "";
     private String ORIGIN_IATA_CODE = "";
 
+    private String SALE_COUNTRY = "";
+
     DatePicker datePicker;
 
     EditText editOrigin;
     EditText editDestination;
 
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if(key.equals(SettingsActivity.KEY_PREF_CURRENCY)) {
+            SALE_COUNTRY = sharedPreferences.getString(key, getString(R.string.default_sale_country));
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+        SALE_COUNTRY = PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_CURRENCY, "");
 
         editOrigin = (EditText) findViewById(R.id.editOrigin);
         editOrigin.setOnClickListener(new View.OnClickListener() {
@@ -81,6 +96,8 @@ public class MainActivity extends ActionBarActivity {
 
 
         datePicker = (DatePicker) findViewById(R.id.datePicker);
+        datePicker.setMinDate(System.currentTimeMillis() - 1000);
+        //datePicker.setCalendarViewShown(false);
         //datePicker.setMinDate(System.currentTimeMillis());
 
         ImageButton swapButton = (ImageButton) findViewById(R.id.swapButton);
@@ -198,6 +215,8 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -243,6 +262,7 @@ public class MainActivity extends ActionBarActivity {
                 requestObject.put("passengers", passengers);
 
                 requestObject.put("refundable", false);
+                requestObject.put("saleCountry", SALE_COUNTRY);
                 requestObject.put("solutions", 7);
 
                 jsonRequest.put("request", requestObject);
@@ -298,5 +318,12 @@ public class MainActivity extends ActionBarActivity {
             intent.putExtra("destinationIATA", DESTINATION_IATA_CODE);
             startActivity(intent);
         }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 }

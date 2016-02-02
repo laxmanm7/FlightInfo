@@ -1,19 +1,19 @@
 package com.ywsggip.flightinfo;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.media.RemoteControlClient;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -48,6 +48,8 @@ public class AirportActivity extends ActionBarActivity {
     private String action;
     private AirportsAdapter mAirportsAdapter;
     private FrameLayout mListCover;
+    private ListView mListView;
+    private int mShortAnimationDuration;
 
     private String queryString;
 
@@ -136,33 +138,12 @@ public class AirportActivity extends ActionBarActivity {
         //mRecentAirports = new RecentAirports(mSharedPref.getStringSet("RECENT_AIRPORTS", null));
         mRecentAirports = new RecentAirports(this);
         mAirportsAdapter.swapCursor(mRecentAirports.getCursor());
-//        if(mSharedPref != null)
-//        {
-//            mRecentlyChosenAirport = new MatrixCursor(AIRPORT_COLUMNS, 1);
-//            String recentAirport = mSharedPref.getString("RECENT", "DEFAULT");
-//            if(!recentAirport.equals("DEFAULT"))
-//            {
-//                String[] airportArray = recentAirport.split(",");
-//                String IATACode = airportArray[0];
-//                String AirportName = airportArray[1];
-//                String City = airportArray[2];
-//                String Country = airportArray[3];
-//
-//                MatrixCursor.RowBuilder rowBuilder = mRecentlyChosenAirport.newRow();
-//                rowBuilder.add(0);
-//                rowBuilder.add(IATACode);
-//                rowBuilder.add(AirportName);
-//                rowBuilder.add(City);
-//                rowBuilder.add(Country);
-//
-//            }
-//            mAirportsAdapter.swapCursor(mRecentlyChosenAirport);
-//        }
 
-
+        mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         mListCover = (FrameLayout) findViewById(R.id.listview_airports_cover);
-        mListCover.getForeground().setAlpha(40);
+        mListCover.getForeground().setAlpha(0);
 
+        //mListCover.setAlpha(0.4f);
 
 
         //init searchView
@@ -179,7 +160,10 @@ public class AirportActivity extends ActionBarActivity {
         queryTextView.setOnFocusChangeListener(new EditText.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                mListCover.getForeground().setAlpha(40);
+                //mListCover.getForeground().setAlpha(40);
+                int alpha = mListCover.getForeground().getAlpha();
+                if (hasFocus && alpha < 150)
+                    coverFadeIn();
             }
         });
 
@@ -191,7 +175,7 @@ public class AirportActivity extends ActionBarActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if(newText.length() > 1) {
+                if (newText.length() > 1) {
                     new FetchAirportsTask().execute(newText);
                 } else {
                     mAirportsAdapter.setQuery(null);
@@ -203,16 +187,16 @@ public class AirportActivity extends ActionBarActivity {
         });
 
 
-        final ListView listView = (ListView) findViewById(R.id.listview_airports);
-        listView.setAdapter(mAirportsAdapter);
+        mListView = (ListView) findViewById(R.id.listview_airports);
+        mListView.setAdapter(mAirportsAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 AirportsAdapter adapter = (AirportsAdapter) parent.getAdapter();
                 Cursor cursor = adapter.getCursor();
 
-                if(cursor != null && cursor.moveToPosition(position)) {
+                if (cursor != null && cursor.moveToPosition(position)) {
                     IATA_CODE = cursor.getString(COL_AIRPORT_IATA);
 
                     String airport = String.format("[%s] %s, %s",
@@ -240,28 +224,39 @@ public class AirportActivity extends ActionBarActivity {
         });
 
 
-        listView.setOnTouchListener(new View.OnTouchListener() {
+        mListView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-//                if(listView.hasFocus()) {
+//                if(mListView.hasFocus()) {
 //                    return false;
 //                }
 //                else {
 
-                    InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
-                    searchView.clearFocus();
-                    listView.requestFocus();
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
+                searchView.clearFocus();
+                mListView.requestFocus();
                 //View focusedView = getWindow().getCurrentFocus();
                 //Log.d(LOG_TAG, "Currently focused view = " + getResources().getResourceEntryName(focusedView.getId()));
-                    mListCover.getForeground().setAlpha(0);
-                    return false;
+
+
+                //mListCover.getForeground().setAlpha(0);
+
+                return false;
 //                }
 
             }
         });
+        mListView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                int alpha = mListCover.getForeground().getAlpha();
+                if (hasFocus && alpha > 0)
+                    coverFadeOut();
+            }
+        });
 
-
+        mListView.requestFocus();
         Intent intent = getIntent();
 
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -342,7 +337,56 @@ public class AirportActivity extends ActionBarActivity {
         }
     }
 
+    private void coverFadeIn()
+    {
 
+        ValueAnimator animation = new ValueAnimator().ofInt(0, 150);
+        animation.setDuration(mShortAnimationDuration);
+        animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            Drawable cover = mListCover.getForeground();
+
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                cover.setAlpha((int) animation.getAnimatedValue());
+            }
+        });
+        animation.start();
+        //mListCover.getForeground().setAlpha(255);
+        //mListCover.setVisibility(View.GONE);
+       /* mListCover.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);*/
+    }
+
+    private void coverFadeOut()
+    {
+        ValueAnimator animation = new ValueAnimator().ofInt(150, 0);
+        animation.setDuration(mShortAnimationDuration);
+        animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            Drawable cover = mListCover.getForeground();
+
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                cover.setAlpha((int) animation.getAnimatedValue());
+            }
+        });
+        animation.start();
+        /*mListCover.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener( new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        //mListCover.getForeground().setAlpha(0);
+                        //mListCover.setVisibility(View.VISIBLE);
+
+                    }
+                });*/
+
+        //int alpha = mListCover.getForeground().getAlpha();
+
+    }
 
 
 }

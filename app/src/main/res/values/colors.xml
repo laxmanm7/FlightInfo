@@ -3,7 +3,8 @@
 
     <color name="transparent">#00000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="nice_blue">#2767fc</color>
+    <color name="nice_blue_deprecated">#2767fc</color>
+    <color name ="nice_blue">#2196f3</color>
 
     <color name="light_gray">#d3d3d3</color>
 
