@@ -19,6 +19,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -227,12 +229,20 @@ public class MainActivity extends ActionBarActivity implements SharedPreferences
 
         String output = "";
         ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-
+        MaterialDialog materialProgressDialog;
         @Override
         protected void onPreExecute() {
             //progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
-            progressDialog.setTitle(R.string.please_wait);
-            progressDialog.show();
+
+//            progressDialog.setTitle(R.string.please_wait);
+//            progressDialog.show();
+           materialProgressDialog = new MaterialDialog.Builder(MainActivity.this)
+                    .title(R.string.please_wait)
+                    .content(R.string.please_wait)
+                    .progress(true, 0)
+                    .progressIndeterminateStyle(true)
+                    .show();
+
             super.onPreExecute();
         }
 
@@ -311,7 +321,9 @@ public class MainActivity extends ActionBarActivity implements SharedPreferences
             super.onPostExecute(result);
             //TextView resultText = (TextView) findViewById(R.id.serverAnswer);
             //resultText.setText(output);
-            progressDialog.dismiss();
+            //progressDialog.dismiss();
+            materialProgressDialog.dismiss();
+
             Intent intent = new Intent(MainActivity.this, ResultsActivity.class );
             intent.putExtra("json", output);
             intent.putExtra("originIATA", ORIGIN_IATA_CODE);
