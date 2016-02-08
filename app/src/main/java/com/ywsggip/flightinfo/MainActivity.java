@@ -3,12 +3,10 @@ package com.ywsggip.flightinfo;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -22,17 +20,16 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -277,35 +274,38 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 String url = "https://www.googleapis.com/qpxExpress/v1/trips/search?key=AIzaSyBg7GwjlxwbKZU7cVSIS3NnzrtjuKXPDNc";
 
                 String json = jsonRequest.toString();
+                URL urlAddress = new URL(url);
+                HttpURLConnection urlConnection = (HttpURLConnection)urlAddress.openConnection();
+                try {
 
-                StringEntity stringEntity = new StringEntity(json);
+                    urlConnection.setDoOutput(true);
+                    urlConnection.setDoInput(true);
+                    urlConnection.setChunkedStreamingMode(0);
 
-                HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(url);
-                httpPost.setEntity(stringEntity);
+                    urlConnection.setRequestProperty("Content-Type", "application/json");
 
-                httpPost.setHeader("Accept", "application/json");
-                httpPost.setHeader("Content-type", "application/json");
+                    OutputStream outputStream = urlConnection.getOutputStream();
+                    outputStream.write(json.getBytes());
+                    outputStream.flush();
+                    outputStream.close();
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                output = getResources().getString(R.string.example);
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                HttpResponse httpResponse = httpclient.execute(httpPost);
 
-                InputStream inputStream = httpResponse.getEntity().getContent();
-                if(inputStream != null){
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null)
-                        output += line;
-                    inputStream.close();
+                    InputStream inputStream = urlConnection.getInputStream();
+                    if (inputStream != null) {
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                        String line;
+                        while ((line = bufferedReader.readLine()) != null)
+                            output += line;
+                        inputStream.close();
+                    } else {
+                        output = "something went wrong";
+                    }
                 }
-                else {
-                    output = "something went wrong";
+                finally {
+                    urlConnection.disconnect();
                 }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
