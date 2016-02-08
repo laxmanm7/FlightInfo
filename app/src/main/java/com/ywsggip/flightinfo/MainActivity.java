@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,7 +38,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 
-public class MainActivity extends ActionBarActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
     private final String ORIGIN = "origin";
     private final String DESTINATION = "destination";
@@ -125,19 +126,15 @@ public class MainActivity extends ActionBarActivity implements SharedPreferences
                 String param = "gafds";
                 FetchInfoTask infoTask = new FetchInfoTask();
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                if(!hasInternetConnection()) {
+                if (!hasInternetConnection()) {
                     Toast.makeText(MainActivity.this, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
-                }
-                else if(DESTINATION_IATA_CODE.isEmpty()) {
+                } else if (DESTINATION_IATA_CODE.isEmpty()) {
                     Toast.makeText(MainActivity.this, "No destination airport chosen", Toast.LENGTH_SHORT).show();
-                }
-                else if(ORIGIN_IATA_CODE.isEmpty()){
+                } else if (ORIGIN_IATA_CODE.isEmpty()) {
                     Toast.makeText(MainActivity.this, "No origin airport chosen", Toast.LENGTH_SHORT).show();
-                }
-                else if(!isChosenDateCorrect()) {
+                } else if (!isChosenDateCorrect()) {
                     Toast.makeText(MainActivity.this, "Invalid date chosen", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     infoTask.execute(param);
                 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

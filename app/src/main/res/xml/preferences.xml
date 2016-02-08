@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <ListPreference
+    <com.afollestad.materialdialogs.prefs.MaterialListPreference
         android:key="pref_currency"
         android:title="@string/pref_title_currency"
         android:entries="@array/pref_currency_titles"
@@ -8,5 +8,5 @@
         android:defaultValue="PL"
         >
 
-    </ListPreference>
+    </com.afollestad.materialdialogs.prefs.MaterialListPreference>
 </PreferenceScreen>
