@@ -38,4 +38,19 @@
         <item name="android:topDark">@color/transparent</item>
     </style>
 
+
+    <style name="CustomTabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabTextAppearance">@style/CustomTextAppearance</item>
+        <item name="tabIndicatorHeight">4dp</item>
+        <item name="tabSelectedTextColor">@color/nice_pink</item>
+        <!--<item name="tabBackground">@color/light_gray2</item>-->
+
+    </style>
+
+
+    <style name="CustomTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>

@@ -1,30 +1,41 @@
 
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:fillViewport="true"
-    android:id="@+id/scrollView"
-    android:layout_gravity="center_horizontal"
-    tools:context=".MainActivity">
 
 <LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:baselineAligned="false"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin">
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity">
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/sliding_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        style="@style/CustomTabLayout"
+        app:tabMode="fixed" />
+
+    <View
+        android:layout_height="0.5dp"
+        android:layout_width="match_parent"
+        android:id="@+id/lastSearchedDivider"
+        android:background="?android:attr/listDivider"/>
 
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp">
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="16dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
 
 
         <LinearLayout
@@ -99,14 +110,82 @@
         </LinearLayout>
     </LinearLayout>
 
-    <DatePicker
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/datePicker"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"
-        android:layout_gravity="center_horizontal"
-        />
+        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/nice_pink"
+                android:textStyle="bold"
+                android:text="Depart"
+                android:id="@+id/departTextView" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dp"
+                android:text=""
+                android:id="@+id/pick_depart_date"
+                android:onClick="showDepartDatePickerDialog"
+                android:layout_gravity="center" />
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/nice_pink_color_selector"
+                android:enabled="false"
+                android:textStyle="bold"
+                android:text="Return"
+                android:id="@+id/returnTextView" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:focusable="false"
+                android:cursorVisible="false"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dp"
+                android:text=""
+                android:id="@+id/pick_return_date"
+                android:enabled="false"
+                android:onClick="showReturnDatePickerDialog"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!--<DatePicker-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/datePicker"-->
+        <!--android:calendarViewShown="false"-->
+        <!--android:datePickerMode="spinner"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--/>-->
+
 
     <LinearLayout
         android:orientation="vertical"
@@ -124,7 +203,10 @@
         android:textAllCaps="false"
         android:background="@color/nice_blue"
         android:textColor="@color/white"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"/>
+
 
     </LinearLayout>
 
@@ -137,5 +219,3 @@
         <!--android:textIsSelectable="true"/>-->
 
 </LinearLayout>
-
-</ScrollView>

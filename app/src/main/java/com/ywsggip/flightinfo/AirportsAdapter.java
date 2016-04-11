@@ -26,8 +26,10 @@ public class AirportsAdapter extends CursorAdapter {
     private static final String LOG_TAG = AirportsAdapter.class.getSimpleName();
     private String queryString;
     private AirportsAdapter mAirportsAdapter;
+    private Context mContext;
     public AirportsAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
+        mContext = context;
     }
 
     public void setQuery(String query) {
@@ -40,7 +42,7 @@ public class AirportsAdapter extends CursorAdapter {
         if(text.toLowerCase().startsWith(queryString.toLowerCase())) {
             Spannable spannable = new SpannableString(text);
 
-            ColorStateList blueColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { Color.rgb(0, 153, 213) });
+            ColorStateList blueColor = new ColorStateList(new int[][] { new int[] {}}, new int[] { mContext.getResources().getColor(R.color.nice_pink) /*Color.rgb(252, 64, 122)*/ }); //ec407a
             TextAppearanceSpan highlightSpan = new TextAppearanceSpan(null, Typeface.NORMAL, -1, blueColor, null);
 
             spannable.setSpan(highlightSpan, 0, queryString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

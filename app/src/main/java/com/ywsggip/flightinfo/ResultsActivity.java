@@ -118,7 +118,7 @@ public class ResultsActivity extends ActionBarActivity {
             String arrival = DESTINATION_IATA_CODE;
             String travelTime = minutesToStringTime(tripOption.getJSONArray("slice").getJSONObject(0).getInt("duration"));
             String price = tripOption.getString("saleTotal");
-            String value = price.substring(firstNumberInString(price), price.length() - 1);
+            String value = price.substring(firstNumberInString(price), price.length());
             String current = price.substring(0, firstNumberInString(price));
             price = value + " " + current;
             Group group = new Group(departure, arrival, travelTime, price);

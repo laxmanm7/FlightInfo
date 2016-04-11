@@ -11,20 +11,27 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -40,7 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class AirportActivity extends ActionBarActivity {
+public class AirportActivity extends AppCompatActivity {
 
     RecentAirports mRecentAirports;
 
@@ -49,6 +56,10 @@ public class AirportActivity extends ActionBarActivity {
     private AirportsAdapter mAirportsAdapter;
     private FrameLayout mListCover;
     private ListView mListView;
+
+    private TextView mLastSearchedTextView;
+    private View mLastSearchedDivider;
+
     private int mShortAnimationDuration;
 
     private String queryString;
@@ -127,15 +138,24 @@ public class AirportActivity extends ActionBarActivity {
         }
     }
 
+    private void hideLastSearchedLabel() {
+        mLastSearchedTextView.setVisibility(View.GONE);
+        mLastSearchedDivider.setVisibility(View.GONE);
+    }
+
+    private void showLastSearchedLabel() {
+        mLastSearchedTextView.setVisibility(View.VISIBLE);
+        mLastSearchedDivider.setVisibility(View.VISIBLE);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_airport);
 
         mAirportsAdapter = new AirportsAdapter(this, null, 0);
 
-        //mSharedPref = getPreferences(Context.MODE_PRIVATE);
-        //mRecentAirports = new RecentAirports(mSharedPref.getStringSet("RECENT_AIRPORTS", null));
         mRecentAirports = new RecentAirports(this);
         mAirportsAdapter.swapCursor(mRecentAirports.getCursor());
 
@@ -143,10 +163,12 @@ public class AirportActivity extends ActionBarActivity {
         mListCover = (FrameLayout) findViewById(R.id.listview_airports_cover);
         mListCover.getForeground().setAlpha(0);
 
-        //mListCover.setAlpha(0.4f);
+        mLastSearchedTextView = (TextView)findViewById(R.id.lastSearchedTextView);
+        mLastSearchedDivider = findViewById(R.id.lastSearchedDivider);
+        if(mRecentAirports.getCursor() == null) {
+            hideLastSearchedLabel();
+        }
 
-
-        //init searchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         final SearchView searchView = (SearchView) findViewById(R.id.searchView);
         SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
@@ -160,7 +182,7 @@ public class AirportActivity extends ActionBarActivity {
         queryTextView.setOnFocusChangeListener(new EditText.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                //mListCover.getForeground().setAlpha(40);
+
                 int alpha = mListCover.getForeground().getAlpha();
                 if (hasFocus && alpha < 150)
                     coverFadeIn();
@@ -176,11 +198,17 @@ public class AirportActivity extends ActionBarActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.length() > 1) {
+
+                    hideLastSearchedLabel();
                     new FetchAirportsTask().execute(newText);
                 } else {
                     mAirportsAdapter.setQuery(null);
-                    //mAirportsAdapter.swapCursor(mRecentlyChosenAirport);
-                    mAirportsAdapter.swapCursor(mRecentAirports.getCursor());
+
+                    if(mRecentAirports.getCursor() != null) {
+                        showLastSearchedLabel();
+                        mAirportsAdapter.swapCursor(mRecentAirports.getCursor());
+                    }
+
                 }
                 return true;
             }
@@ -199,7 +227,7 @@ public class AirportActivity extends ActionBarActivity {
                 if (cursor != null && cursor.moveToPosition(position)) {
                     IATA_CODE = cursor.getString(COL_AIRPORT_IATA);
 
-                    String airport = String.format("[%s] %s, %s",
+                    String airport = String.format("(%s) %s, %s",
                             IATA_CODE,
                             cursor.getString(COL_AIRPORT_CITY),
                             cursor.getString(COL_AIRPORT_COUNTRY));
@@ -210,13 +238,9 @@ public class AirportActivity extends ActionBarActivity {
                     setResult(RESULT_OK, intent);
                     searchView.clearFocus();
 
-                    //SharedPreferences.Editor sharedPrefEditor = mSharedPref.edit();
-
-                    //sharedPrefEditor.putString("RECENT", IATA_CODE + "," + cursor.getString(COL_AIRPORT_NAME) + "," + cursor.getString(COL_AIRPORT_CITY) + "," + cursor.getString(COL_AIRPORT_COUNTRY));
                     mRecentAirports.addAirport(IATA_CODE, cursor.getString(COL_AIRPORT_NAME), cursor.getString(COL_AIRPORT_CITY), cursor.getString(COL_AIRPORT_COUNTRY));
                     mRecentAirports.save();
-                    //sharedPrefEditor.putStringSet("RECENT_AIRPORTS", mRecentAirports.getSet());
-                    //sharedPrefEditor.commit();
+
                     finish();
                 }
 
@@ -227,24 +251,12 @@ public class AirportActivity extends ActionBarActivity {
         mListView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-//                if(mListView.hasFocus()) {
-//                    return false;
-//                }
-//                else {
-
                 InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
                 searchView.clearFocus();
                 mListView.requestFocus();
-                //View focusedView = getWindow().getCurrentFocus();
-                //Log.d(LOG_TAG, "Currently focused view = " + getResources().getResourceEntryName(focusedView.getId()));
-
-
-                //mListCover.getForeground().setAlpha(0);
 
                 return false;
-//                }
-
             }
         });
         mListView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -277,6 +289,19 @@ public class AirportActivity extends ActionBarActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Toast.makeText(this, "fasdfad", Toast.LENGTH_LONG);
@@ -288,27 +313,6 @@ public class AirportActivity extends ActionBarActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_airport, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
 
     public class FetchAirportsTask extends AsyncTask<String, Integer, Cursor>{
@@ -333,13 +337,11 @@ public class AirportActivity extends ActionBarActivity {
         protected void onPostExecute(Cursor cursor) {
             super.onPostExecute(cursor);
             mAirportsAdapter.swapCursor(cursor);
-
         }
     }
 
     private void coverFadeIn()
     {
-
         ValueAnimator animation = new ValueAnimator().ofInt(0, 150);
         animation.setDuration(mShortAnimationDuration);
         animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -351,12 +353,6 @@ public class AirportActivity extends ActionBarActivity {
             }
         });
         animation.start();
-        //mListCover.getForeground().setAlpha(255);
-        //mListCover.setVisibility(View.GONE);
-       /* mListCover.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);*/
     }
 
     private void coverFadeOut()
@@ -372,20 +368,6 @@ public class AirportActivity extends ActionBarActivity {
             }
         });
         animation.start();
-        /*mListCover.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener( new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        //mListCover.getForeground().setAlpha(0);
-                        //mListCover.setVisibility(View.VISIBLE);
-
-                    }
-                });*/
-
-        //int alpha = mListCover.getForeground().getAlpha();
-
     }
 
 

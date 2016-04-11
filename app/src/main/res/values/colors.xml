@@ -5,7 +5,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="nice_blue_deprecated">#2767fc</color>
     <color name ="nice_blue">#2196f3</color>
+    <color name="nice_pink">#f06292</color>
 
     <color name="light_gray">#d3d3d3</color>
 
+    <color name="tab_background_selected">@color/transparent</color>
+    <color name="tab_background_unselected">#bdbdbd</color>
+
+    <color name="light_gray2">#F5F5F5</color>
 </resources>
