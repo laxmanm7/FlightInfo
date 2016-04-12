@@ -39,6 +39,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
@@ -91,13 +92,15 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
             else
                 datePickerDialog.getDatePicker().setMinDate(MainActivity.departDateInMillis);
-
             return datePickerDialog;
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
             // Do something with the date chosen by the user
-            long timeInMillis = view.getCalendarView().getDate();
+            Calendar c = Calendar.getInstance(TimeZone.getDefault());
+            c.set(year, month, day);
+            //long timeInMillis = view.getCalendarView().getDate();
+            long timeInMillis = c.getTimeInMillis();
             setDateFields(timeInMillis);
         }
 
