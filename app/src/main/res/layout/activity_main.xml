@@ -54,6 +54,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
                 android:cursorVisible="false"
                 android:focusable="false"
                 android:id="@+id/editOrigin"
@@ -69,9 +70,11 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
                 android:focusable="false"
                 android:cursorVisible="false"
-                android:id="@+id/editDestination"/>
+                android:id="@+id/editDestination"
+                android:paddingLeft="8dp"/>
 
 
 

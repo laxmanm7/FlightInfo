@@ -61,6 +61,7 @@ class Airport
 }
 
 public class RecentAirports {
+    private final int mRecentNumber = 5;
     private MatrixCursor mCursor;
     private SharedPreferences mSharedPref;
     private static final String[] AIRPORT_COLUMNS = {
@@ -93,7 +94,7 @@ public class RecentAirports {
         }
 
         mAirports.add(new Airport(IATACode, AirportName, City, Country));
-        if(mAirports.size() > 4)
+        if(mAirports.size() > mRecentNumber)
         {
             mAirports.remove(0);
         }
@@ -113,9 +114,9 @@ public class RecentAirports {
     public RecentAirports(Context context)
     {
         mSharedPref = context.getSharedPreferences("RecentAirports", Context.MODE_PRIVATE);
-        mAirports = new ArrayList<>(5);
+        mAirports = new ArrayList<>(mRecentNumber);
         int i = 0;
-        while(i < 4)
+        while(i < mRecentNumber)
         {
             String recentAirportBundle = mSharedPref.getString(String.valueOf(i), "DEFAULT");
             if(!recentAirportBundle.equals("DEFAULT"))

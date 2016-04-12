@@ -1,52 +1,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingTop="8dp"
 
     android:orientation="vertical"
     tools:context="com.ywsggip.flightinfo.AirportActivity">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_gravity="center"
-        android:text="point"
-        android:id="@+id/pointTextView" />
-
-
-
-    <!--<RelativeLayout-->
-        <!--android:orientation="horizontal"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="wrap_content">-->
-
-
-        <!--<EditText-->
-            <!--android:layout_width="fill_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:id="@+id/airport_code"-->
-            <!--android:hint="@string/airport_hint"-->
-
-            <!--android:layout_toLeftOf="@+id/accept_button"/>-->
-
-        <!--<Button-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/accept"-->
-            <!--android:id="@+id/accept_button"-->
-            <!--android:layout_alignParentRight="true"-->
-            <!--android:textAllCaps="false"/>-->
-
-
-    <!--</RelativeLayout>-->
 
     <SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/searchView"
         android:layout_gravity="center_horizontal"
-        android:iconifiedByDefault="false"/>
+        android:iconifiedByDefault="false"
+        android:paddingBottom="8dp"/>
 
 
 

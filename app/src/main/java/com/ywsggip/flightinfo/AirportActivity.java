@@ -277,12 +277,11 @@ public class AirportActivity extends AppCompatActivity {
         } else {
 
             action = intent.getStringExtra("action");
-            final TextView pointText = (TextView) findViewById(R.id.pointTextView);
             if(action.equals("origin")) {
-                pointText.setText(R.string.origin_point);
+                setTitle(R.string.select_origin);
             }
             else if (action.equals("destination")) {
-                pointText.setText(R.string.destination_point);
+                setTitle(R.string.select_destination);
             }
         }
 

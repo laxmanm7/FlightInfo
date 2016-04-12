@@ -9,6 +9,8 @@
     <string name="please_wait">Please wait...</string>
     <string name="origin_point">Origin point</string>
     <string name="destination_point">Destination point</string>
+    <string name="select_origin">Select origin</string>
+    <string name="select_destination">Select destination</string>
 
     <string name="airport_hint">Find airport</string>
     <string name="accept">Accept</string>
