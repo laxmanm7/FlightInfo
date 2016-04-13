@@ -125,11 +125,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     updateReturnDate = true;
                 }
 
-                    //updateReturnDateFields(departDateInMillis);
+                //updateReturnDateFields(departDateInMillis);
                 MainActivity.departDate = MainActivity.getQueryDate(timeInMillis);
                 EditText departDate = (EditText)getActivity().findViewById(R.id.pick_depart_date);
                 departDate.setText(formattedDate);
-;
+                ;
             }
             if(MainActivity.settingReturnDate || updateReturnDate){ //setting return date
                 returnDateInMillis = timeInMillis;
@@ -283,6 +283,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     Toast.makeText(MainActivity.this, "No destination airport chosen", Toast.LENGTH_SHORT).show();
                 } else if (ORIGIN_IATA_CODE.isEmpty()) {
                     Toast.makeText(MainActivity.this, "No origin airport chosen", Toast.LENGTH_SHORT).show();
+                }
+                else if(ORIGIN_IATA_CODE.equals(DESTINATION_IATA_CODE)) {
+                    Toast.makeText(MainActivity.this, "Origin and destination can't be the same", Toast.LENGTH_SHORT).show();
                 }
 //                else if (!isChosenDateCorrect()) {
 //                    Toast.makeText(MainActivity.this, "Invalid date chosen", Toast.LENGTH_SHORT).show();
@@ -452,7 +455,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
 //            progressDialog.setTitle(R.string.please_wait);
 //            progressDialog.show();
-           materialProgressDialog = new MaterialDialog.Builder(MainActivity.this)
+            materialProgressDialog = new MaterialDialog.Builder(MainActivity.this)
                     .title(R.string.please_wait)
                     .content("Searching...")
                     .progress(true, 0)
@@ -467,40 +470,36 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
             JSONObject jsonRequest = new JSONObject();
             try {
-                //String DATE = getQueryDate(getChosenTime());
-
                 JSONObject requestObject = new JSONObject();
 
                 JSONObject originDestination = new JSONObject();
-//////////////////////////////////////////////////////////////////////////////////////////
-                originDestination.put("origin", ORIGIN_IATA_CODE);
-                originDestination.put("destination", DESTINATION_IATA_CODE);
-//////////////////////////////////////////////////////////////////////////////////////////
-//                originDestination.put("origin", "GDN");
-//                originDestination.put("destination", "OSL");
-                originDestination.put("date", departDate);
+
+                originDestination.put(QPXConstants.KEY_ORIGIN, ORIGIN_IATA_CODE);
+                originDestination.put(QPXConstants.KEY_DESTINATION, DESTINATION_IATA_CODE);
+
+                originDestination.put(QPXConstants.KEY_DATE, departDate);
                 JSONArray slice = new JSONArray();
                 slice.put(originDestination);
                 if(withReturn) {
                     JSONObject returnOriginDestination = new JSONObject();
-                    returnOriginDestination.put("origin", DESTINATION_IATA_CODE);
-                    returnOriginDestination.put("destination", ORIGIN_IATA_CODE);
-                    returnOriginDestination.put("date", returnDate);
+                    returnOriginDestination.put(QPXConstants.KEY_ORIGIN, DESTINATION_IATA_CODE);
+                    returnOriginDestination.put(QPXConstants.KEY_DESTINATION, ORIGIN_IATA_CODE);
+                    returnOriginDestination.put(QPXConstants.KEY_DATE, returnDate);
                     slice.put(returnOriginDestination);
                 }
 
 
-                requestObject.put("slice", slice);
+                requestObject.put(QPXConstants.KEY_SLICE, slice);
 
                 JSONObject passengers = new JSONObject();
-                passengers.put("adultCount", 1);
-                requestObject.put("passengers", passengers);
+                passengers.put(QPXConstants.KEY_ADULTCOUNT, 1);
+                requestObject.put(QPXConstants.KEY_PASSENGERS, passengers);
 
-                requestObject.put("refundable", false);
-                requestObject.put("saleCountry", SALE_COUNTRY);
-                requestObject.put("solutions", 8);
+                requestObject.put(QPXConstants.KEY_REFUNDABLE, false);
+                requestObject.put(QPXConstants.KEY_SALECOUNTRY, SALE_COUNTRY);
+                requestObject.put(QPXConstants.KEY_SOLUTIONS, 8);
 
-                jsonRequest.put("request", requestObject);
+                jsonRequest.put(QPXConstants.KEY_REQUEST, requestObject);
 
                 String url = "https://www.googleapis.com/qpxExpress/v1/trips/search?key=AIzaSyBg7GwjlxwbKZU7cVSIS3NnzrtjuKXPDNc";
 
@@ -547,9 +546,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            //TextView resultText = (TextView) findViewById(R.id.serverAnswer);
-            //resultText.setText(output);
-            //progressDialog.dismiss();
+
             materialProgressDialog.dismiss();
 
             Intent intent = new Intent(MainActivity.this, ResultsActivity.class );
