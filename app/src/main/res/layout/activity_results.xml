@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:id="@+id/results_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:paddingBottom="0dp"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="0dp"
     tools:context=".ResultsActivity">
 
-    <ExpandableListView
+    <fragment
+        android:id="@+id/results"
+        class="com.ywsggip.flightinfo.ResultsFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/expandableListView"
-        android:layout_gravity="center_horizontal" />
+        android:layout_height="match_parent" />
+
 
     <TextView
         android:id="@+id/empty"
-        android:textAlignment="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:text="No results" />
+        android:layout_height="match_parent"
+        android:text="No results"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 </LinearLayout>
