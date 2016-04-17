@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-
-<ExpandableListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/expandableListView"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal" />
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
+    <ExpandableListView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/expandableListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="No results"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+</LinearLayout>

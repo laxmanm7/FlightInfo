@@ -15,14 +15,9 @@
         android:id="@+id/results"
         class="com.ywsggip.flightinfo.ResultsFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-
-    <TextView
-        android:id="@+id/empty"
-        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="No results"
-        android:textAlignment="center"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        tools:layout="@layout/fragment_results" />
+
+
+
 </LinearLayout>
