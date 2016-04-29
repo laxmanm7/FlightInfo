@@ -2,16 +2,23 @@ package com.ywsggip.flightinfo;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.DataSetObserver;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -28,13 +35,47 @@ import java.util.Map;
  */
 public class ResultsFragment extends Fragment {
 
+    OnResultSelectedListener mCallback;
+
     private final String LOG_TAG = ResultsFragment.class.getSimpleName();
     private String DESTINATION_IATA_CODE;
     private String ORIGIN_IATA_CODE;
 
-    SparseArray<Group> groups;// = new SparseArray<>();
+    //SparseArray<Group> groups;// = new SparseArray<>();
+    ArrayList<Group> groups;
     Map<String, String> carriers = new HashMap<String, String>();
+    ListView expandableListView;
 
+    boolean carrierInfo;
+    boolean withReturn;
+
+    public interface OnResultSelectedListener {
+        void onResultSelected(ArrayList<TripDetails> data, ArrayList<TripDetails> returnData);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try{
+            mCallback = (OnResultSelectedListener)context;
+        }
+        catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + "must implement OnResultSelectedListener");
+        }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try{
+            mCallback = (OnResultSelectedListener)activity;
+        }
+        catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + "must implement OnResultSelectedListener");
+        }
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -44,6 +85,8 @@ public class ResultsFragment extends Fragment {
         ORIGIN_IATA_CODE = intent.getStringExtra("originIATA");
         DESTINATION_IATA_CODE = intent.getStringExtra("destinationIATA");
 
+        SharedPreferences preferences = getActivity().getSharedPreferences(getString(R.string.flight_preferences_file_key), Context.MODE_PRIVATE);
+        withReturn = preferences.getBoolean("withReturn", false);
         try {
             groups = extractDataFromJson(jsonData);
         }
@@ -51,10 +94,19 @@ public class ResultsFragment extends Fragment {
             e.printStackTrace();
         }
 
-        ExpandableListView expandableListView = (ExpandableListView) getView().findViewById(R.id.expandableListView);
-        ResultsExpandableListAdapter adapter = new ResultsExpandableListAdapter(getActivity(), groups);
+        expandableListView = (ListView) getView().findViewById(R.id.expandableListView);
+        ResultsListAdapter adapter = new ResultsListAdapter(getActivity(), groups);
         expandableListView.setAdapter(adapter);
-        expandableListView.setEmptyView(getActivity().findViewById(R.id.empty));
+        TextView emptyView = (TextView)view.findViewById(R.id.empty);
+        expandableListView.setEmptyView(getView().findViewById(R.id.empty));
+
+       expandableListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+           @Override
+           public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+               Group group = groups.get(position);
+               mCallback.onResultSelected(group.detailsList, group.returnDetailsList);
+           }
+       });
     }
 
 
@@ -91,12 +143,12 @@ public class ResultsFragment extends Fragment {
             return -1;
     }
 
-    private SparseArray<Group> extractDataFromJson(String json) throws JSONException {
-        SparseArray<Group> result = new SparseArray<>();
+    private ArrayList<Group> extractDataFromJson(String json) throws JSONException {
+        ArrayList<Group> result = new ArrayList<>();
         JSONObject request = new JSONObject(json);
         JSONObject data = request.getJSONObject("trips").getJSONObject("data");
 
-        boolean carrierInfo;
+
         try{
             JSONArray carriers = data.getJSONArray("carrier");
             for(int i = 0; i < carriers.length(); ++i) {
@@ -127,55 +179,97 @@ public class ResultsFragment extends Fragment {
             price = value + " " + current;
             Group group = new Group(departure, arrival, travelTime, price);
 
-            JSONArray segments = tripOption.getJSONArray("slice").getJSONObject(0).getJSONArray("segment");
-            for(int j = 0; j < segments.length(); ++j) {
-                JSONObject segment = segments.getJSONObject(j);
-                String carrier;
-                if(carrierInfo) {
-                    carrier = ResultsFragment.this.carriers.get(segment.getJSONObject("flight").getString("carrier"));
-                } else {
-                    carrier = "No carrier data";
-                }
 
+            JSONObject departSlice = tripOption.getJSONArray("slice").getJSONObject(0);
+            ArrayList<TripDetails> departDetails = getDetailsFromSlice(departSlice);
+            group.detailsList = departDetails;
 
-                JSONObject detailInfo = segment.getJSONArray("leg").getJSONObject(0);
-
-                String departureTime = detailInfo.getString("departureTime");
-                String arrivalTime = detailInfo.getString("arrivalTime");
-
-                String departureDetail = detailInfo.getString("origin") + " "
-                        + departureTime.substring(departureTime.indexOf("T")+1, departureTime.indexOf("+")) + " "
-                        + departureTime.substring(departureTime.indexOf("-")+1, departureTime.indexOf("T"));
-
-                String arriveDetail = detailInfo.getString("destination") + " "
-                        + arrivalTime.substring(arrivalTime.indexOf("T")+1, arrivalTime.indexOf("+")) + " "
-                        + arrivalTime.substring(arrivalTime.indexOf("-")+1, arrivalTime.indexOf("T"));
-
-                String detailTime = minutesToStringTime(detailInfo.getInt("duration"));
-
-                Details details = new Details(carrier, departureDetail, arriveDetail, detailTime);
-                group.detailsList.add(details);
+            if(withReturn) {
+                JSONObject returnSlice = tripOption.getJSONArray("slice").getJSONObject(1);
+                ArrayList<TripDetails> returnDetails = getDetailsFromSlice(returnSlice);
+                group.returnDetailsList = returnDetails;
             }
-            result.put(i, group);
+
+            result.add(group);
         }
 
         return result;
     }
 
-    private class ResultsExpandableListAdapter extends BaseExpandableListAdapter {
+    public ArrayList<TripDetails> getDetailsFromSlice(JSONObject slice) throws JSONException {
+        ArrayList<TripDetails> result;
+        JSONArray segments = slice.getJSONArray("segment");
+        if(segments.length() == 0)
+            return null;
+        else
+            result = new ArrayList<>();
+        for(int j = 0; j < segments.length(); ++j) {
+            JSONObject segment = segments.getJSONObject(j);
+            String carrier;
+            if(carrierInfo) {
+                carrier = ResultsFragment.this.carriers.get(segment.getJSONObject("flight").getString("carrier"));
+            } else {
+                carrier = "No carrier data";
+            }
+            String connectionTime = "";
+            if(segment.has("connectionDuration"))
+                connectionTime = minutesToStringTime(segment.getInt("connectionDuration"));
 
-        private final SparseArray<Group> groups;
+            JSONObject detailInfo = segment.getJSONArray("leg").getJSONObject(0);
+
+            String departureTime = detailInfo.getString("departureTime");
+            String arrivalTime = detailInfo.getString("arrivalTime");
+
+            String departureDetail = detailInfo.getString("origin") + " "
+                    + departureTime.substring(departureTime.indexOf("T")+1, departureTime.indexOf("+")) + " "
+                    + departureTime.substring(departureTime.indexOf("-")+1, departureTime.indexOf("T"));
+
+            String arriveDetail = detailInfo.getString("destination") + " "
+                    + arrivalTime.substring(arrivalTime.indexOf("T")+1, arrivalTime.indexOf("+")) + " "
+                    + arrivalTime.substring(arrivalTime.indexOf("-")+1, arrivalTime.indexOf("T"));
+
+            String detailTime = minutesToStringTime(detailInfo.getInt("duration"));
+
+            TripDetails details = new TripDetails(carrier, departureDetail, arriveDetail, detailTime);
+            details.setConnectionTime(connectionTime);
+
+            result.add(details);
+        }
+        return result;
+    }
+    private class ResultsListAdapter implements ListAdapter {
+
         public LayoutInflater inflater;
-        public Activity activity;
+        ArrayList<Group> groups;
 
-        public ResultsExpandableListAdapter(Activity activity, SparseArray<Group> groups) {
-            this.activity = activity;
+
+        public ResultsListAdapter(Activity activity, ArrayList<Group> groups) {
+            this.inflater = activity.getLayoutInflater();
             this.groups = groups;
-            inflater = activity.getLayoutInflater();
         }
 
         @Override
-        public int getGroupCount() {
+        public boolean areAllItemsEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return true;
+        }
+
+        @Override
+        public void registerDataSetObserver(DataSetObserver observer) {
+
+        }
+
+        @Override
+        public void unregisterDataSetObserver(DataSetObserver observer) {
+
+        }
+
+        @Override
+        public int getCount() {
             if(groups != null)
                 return groups.size();
             else
@@ -183,27 +277,12 @@ public class ResultsFragment extends Fragment {
         }
 
         @Override
-        public int getChildrenCount(int groupPosition) {
-            return groups.get(groupPosition).detailsList.size();
+        public Object getItem(int position) {
+            return groups.get(position);
         }
 
         @Override
-        public Object getGroup(int groupPosition) {
-            return groups.get(groupPosition);
-        }
-
-        @Override
-        public Object getChild(int groupPosition, int childPosition) {
-            return groups.get(groupPosition).detailsList.get(childPosition);
-        }
-
-        @Override
-        public long getGroupId(int groupPosition) {
-            return 0;
-        }
-
-        @Override
-        public long getChildId(int groupPosition, int childPosition) {
+        public long getItemId(int position) {
             return 0;
         }
 
@@ -213,11 +292,11 @@ public class ResultsFragment extends Fragment {
         }
 
         @Override
-        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, ViewGroup parent) {
             if(convertView == null) {
                 convertView = inflater.inflate(R.layout.list_group_results, null);
             }
-            Group group = (Group) getGroup(groupPosition);
+            Group group =  groups.get(position);
 
             TextView departure = (TextView) convertView.findViewById(R.id.departure_textView);
             TextView arrival = (TextView) convertView.findViewById(R.id.arrival_textView);
@@ -232,39 +311,30 @@ public class ResultsFragment extends Fragment {
         }
 
         @Override
-        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-            if(convertView == null) {
-                convertView = inflater.inflate(R.layout.list_details_results, null);
-            }
-            TextView departureDetail = (TextView) convertView.findViewById(R.id.departure_detail_textView);
-            TextView arrivalDetail = (TextView) convertView.findViewById(R.id.arrival_detail_textView);
-            TextView travelTimeDetail = (TextView) convertView.findViewById(R.id.travel_time_detail_textView);
-            TextView carrier = (TextView) convertView.findViewById(R.id.carrier_detail_textView);
-
-            Details details = (Details) getChild(groupPosition, childPosition);
-
-            departureDetail.setText(details.departureDetail);
-            arrivalDetail.setText(details.arrivalDetail);
-            travelTimeDetail.setText(details.detailTime);
-            carrier.setText(details.carrier);
-
-            return convertView;
+        public int getItemViewType(int position) {
+            return 0;
         }
 
         @Override
-        public boolean isChildSelectable(int groupPosition, int childPosition) {
-            return false;
+        public int getViewTypeCount() {
+            return 1;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return getCount() == 0;
         }
     }
 
-    private class Group {
+
+    public class Group {
         public String departure;
         public String arrival;
         public String travelTime;
         public String price;
 
-        public final List<Details> detailsList = new ArrayList<Details>();
-
+        public ArrayList<TripDetails> detailsList;
+        public ArrayList<TripDetails> returnDetailsList = null;
         public Group(String departure, String arrival, String travelTime, String price) {
             this.departure = departure;
             this.arrival = arrival;
@@ -272,19 +342,77 @@ public class ResultsFragment extends Fragment {
             this.price = price;
         }
 
+
+
     }
 
-    private class Details {
+    public class TripDetails implements Parcelable {
         private String carrier;
         private String departureDetail;
         private String arrivalDetail;
         private String detailTime;
 
-        public Details(String carrier, String departureDetail, String arrivalDetail, String detailTime) {
+        private String connectionTime = "";
+
+        public TripDetails(String carrier, String departureDetail, String arrivalDetail, String detailTime) {
             this.carrier = carrier;
             this.departureDetail = departureDetail;
             this.arrivalDetail = arrivalDetail;
             this.detailTime = detailTime;
         }
+
+        protected TripDetails(Parcel in) {
+            carrier = in.readString();
+            departureDetail = in.readString();
+            arrivalDetail = in.readString();
+            detailTime = in.readString();
+        }
+
+        public String getCarrier() {
+            return carrier;
+        }
+        public String getDepartureDetail() {
+            return departureDetail;
+        }
+        public String getArrivalDetail() {
+            return arrivalDetail;
+        }
+        public String getDetailTime() {
+            return detailTime;
+        }
+
+        public String getConnectionTime() {
+            return  connectionTime;
+        }
+
+        public void setConnectionTime(String connectionTime) {
+            this.connectionTime = connectionTime;
+        }
+
+        public final Creator<TripDetails> CREATOR = new Creator<TripDetails>() {
+            @Override
+            public TripDetails createFromParcel(Parcel in) {
+                return new TripDetails(in);
+            }
+
+            @Override
+            public TripDetails[] newArray(int size) {
+                return new TripDetails[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(carrier);
+            dest.writeString(departureDetail);
+            dest.writeString(arrivalDetail);
+            dest.writeString(detailTime);
+        }
     }
+
 }

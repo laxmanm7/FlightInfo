@@ -298,7 +298,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         });
 
 
-        mPref = getPreferences(Context.MODE_PRIVATE);
+        //mPref = getPreferences(Context.MODE_PRIVATE);
+        mPref = getSharedPreferences(getString(R.string.flight_preferences_file_key), Context.MODE_PRIVATE);
         editOrigin.setText(mPref.getString("origin", ""));
         editDestination.setText(mPref.getString("destination", ""));
         ORIGIN_IATA_CODE = mPref.getString("originIATA", "");
@@ -310,23 +311,32 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
         departDateInMillis = mPref.getLong("departDateInMillis", System.currentTimeMillis());
         returnDateInMillis = mPref.getLong("returnDateInMillis", departDateInMillis);
-        //DatePickerFragment.set
-        updateDepartDate(departDateInMillis);
-        updateReturnDate(returnDateInMillis);
+
+        //update dates since they might be no longer valid i.e. point to past
+        updateDepartDate();
+        updateReturnDate();
     }
 
 
-    private void updateDepartDate(long timeInMillis){
-        String formattedDate = getFormattedDate(timeInMillis);
-        MainActivity.departDate = MainActivity.getQueryDate(timeInMillis);
+    private void updateDepartDate(){
+        if(departDateInMillis < getTomorrowTime() )
+            departDateInMillis = getTodayTime();
+        else if(departDateInMillis < getDayAfterTomorrowTime())
+            departDateInMillis = getTomorrowTime();
+
+        String formattedDate = getFormattedDate(departDateInMillis);
+        MainActivity.departDate = MainActivity.getQueryDate(departDateInMillis);
         EditText departDate = (EditText) findViewById(R.id.pick_depart_date);
         departDate.setText(formattedDate);
     }
 
 
-    private void updateReturnDate(long timeInMillis) {
-        String formattedDate = getFormattedDate(timeInMillis);
-        MainActivity.returnDate = MainActivity.getQueryDate(timeInMillis);
+    private void updateReturnDate() {
+        if(returnDateInMillis < departDateInMillis)
+            returnDateInMillis = departDateInMillis;
+
+        String formattedDate = getFormattedDate(returnDateInMillis);
+        MainActivity.returnDate = MainActivity.getQueryDate(returnDateInMillis);
         EditText returnDate = (EditText) findViewById(R.id.pick_return_date);
         returnDate.setText(formattedDate);
     }

@@ -1,29 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/results_details_text_view"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
-    android:gravity="left"
-    android:layout_marginLeft="8dp"
-    android:paddingLeft="30dp"
-    android:text=""
-    android:textSize="32sp"
+    android:layout_height="match_parent"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:gravity="center_vertical"
+    android:paddingLeft="16dp"
     android:orientation="vertical"
-    tools:context=".ResultsActivity"
-    android:layout_marginBottom="10dp"
+    android:layout_gravity="center_vertical"
     >
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <LinearLayout
         android:orientation="horizontal"
-        android:id="@+id/carrier_relativeLayout">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:text="GDN 9:15 28-06"
             android:id="@+id/departure_detail_textView"
             android:layout_marginRight="16dp"/>
@@ -39,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:text="OSL 1:15 30-06"
             android:id="@+id/arrival_detail_textView"
             android:layout_marginLeft="16dp"
@@ -47,22 +42,21 @@
             android:layout_alignParentRight="true"
             />
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        >
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:text="Scandinavian Airlines System (SAS)"
-
+            android:textColor="?android:textColorSecondary"
             android:id="@+id/carrier_detail_textView"
-            android:layout_marginRight="16dp"
             />
 
     </LinearLayout>

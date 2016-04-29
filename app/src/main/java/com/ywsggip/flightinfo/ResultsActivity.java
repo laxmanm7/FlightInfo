@@ -1,35 +1,18 @@
 package com.ywsggip.flightinfo;
 
-import android.app.Activity;
-import android.app.ExpandableListActivity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
-import android.util.SparseArray;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
-import android.widget.TextView;
+import android.support.v7.app.AppCompatActivity;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.ywsggip.flightinfo.ResultsFragment.TripDetails;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Admin on 2015-06-09.
  */
-public class ResultsActivity extends ActionBarActivity {
+public class ResultsActivity extends AppCompatActivity implements ResultsFragment.OnResultSelectedListener {
 
     private final String LOG_TAG = ResultsActivity.class.getSimpleName();
 
@@ -48,4 +31,26 @@ public class ResultsActivity extends ActionBarActivity {
     }
 
 
+    @Override
+    public void onResultSelected(ArrayList<TripDetails> data, ArrayList<TripDetails> returnData) {
+        ResultDetailsFragment fragment = ResultDetailsFragment.newInstance(data, returnData);
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+
+        //transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        transaction.replace(R.id.results_container, fragment);
+        transaction.addToBackStack(null);
+
+        transaction.commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStack();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }
